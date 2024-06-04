@@ -15,7 +15,7 @@ app.use(cors())
 
 
 //user routes
-app.use('/api',userRouter)
+app.use('/auth',userRouter)
 
 // server starting and port listening 
 dbConnect().then(()=>{
