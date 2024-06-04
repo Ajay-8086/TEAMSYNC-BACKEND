@@ -2,11 +2,11 @@ import { userModel } from "../models/user";
 import { Request , Response } from "express";
 import validation from "../utilities/validation";
 import bcrypt from "bcrypt"
-
+import sendMail from "../utilities/sendOtpMail";
+//otp storing space
+const otpStore = new Map()
 export default{
-   
    //user signup 
-
  createUser: async(req:Request,res:Response)=>{
     try {   
         const {userName,email,password,confirmPassword} = req.body
@@ -31,12 +31,18 @@ export default{
             password:hashedPassword,
          })
          await newUser.save()
+         // generating random otp
+         const gernerateOtp =  Math.floor(1000 + Math.random() * 9000)
+         const userId = newUser._id
+         // storin the otp in the otpStore variable 
+         otpStore.set(userId,{gernerateOtp})
+         // sending the otp to the email
+         console.log(otpStore);
+         await sendMail(email, gernerateOtp);
+         res.status(200).json('User registered successfully')
         }
-
-
     } catch (error) {
         console.log(error);
-        
     }
  } ,
 }
