@@ -8,5 +8,7 @@ const router = Router()
 router.post('/register',authController.createUser)
 // verifying otp 
 router.post('/verify_otp',authController.verifyOtp)
+// user login
+router.post('/login',authController.login)
 
 export default router

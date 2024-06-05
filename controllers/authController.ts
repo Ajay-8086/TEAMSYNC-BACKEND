@@ -3,6 +3,7 @@ import { Request , Response } from "express";
 import validation from "../utilities/validation";
 import bcrypt from "bcrypt"
 import sendMail from "../utilities/sendOtpMail";
+import jwt from 'jsonwebtoken';
 //otp storing space
 const otpStore = new Map()
 export default{
@@ -86,5 +87,51 @@ export default{
          console.log('Internal server error');
          
       }
- }
+ },
+   // user login 
+      login:async(req:Request,res:Response)=>{
+         try {
+            const {email,password} = req.body
+            if(!validation.validatioField([email,password])){
+               return res.status(400).json({message:'Please fill all the fields'})
+            }else if(!validation.emailValidation(email)){
+               return res.status(422).json({message:'Invalid email format'})
+            }else if(!validation.passwordValidation(password)){
+               return res.status(422).json({message:'Invalid password format'})
+            }
+            // checkin the user exist or not
+            const userExist = await userModel.findOne({email})
+            if(userExist){
+               if(userExist.verified){
+                  // checking the password
+                  const passwordMatch = await bcrypt.compare(password,userExist.password)
+                  if(passwordMatch){
+                     const payload = {
+                        userId:userExist._id,
+                        email:userExist.email,
+                        userName:userExist.userName
+                     }
+                     const token = jwt.sign(payload,process.env.JWT_SECRET as string)
+                     return res.status(200).json({message:'user login is success full',token})
+                  }else{
+                     return res.status(400).json({message:'Invalid password'})
+                  }
+               }else{
+                  // generating random otp
+                  const gernerateOtp =  Math.floor(1000 + Math.random() * 9000)
+                  // sending the otp to the email
+                  await sendMail(email, gernerateOtp);
+                  const otpExpire = 10 * 60 * 1000
+                  // storin the otp in the otpStore variable 
+                  otpStore.set(email,{gernerateOtp,expire:Date.now() + otpExpire})
+                  return res.status(403).json({message:'verification is required',email})
+               }
+            }else{
+               return res.status(404).json('User doesnot exist')
+            }
+         } catch (error) {
+            console.log('error',error);
+            res.status(500).json({mesage:"Internal server error"})
+         }
+      }
 }
