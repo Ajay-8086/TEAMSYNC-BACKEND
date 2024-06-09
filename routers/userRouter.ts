@@ -2,13 +2,19 @@ import { Router } from "express";
 
 //importing controller
 import authController from "../controllers/authController";
+//importing workspace controller
+import workSpace from "../controllers/workSpaceController";
+
 const router = Router()
 
 // user signup
-router.post('/register',authController.createUser)
+router.post('/auth/register',authController.createUser)
 // verifying otp 
-router.post('/verify_otp',authController.verifyOtp)
+router.post('/auth/verify_otp',authController.verifyOtp)
 // user login
-router.post('/login',authController.login)
+router.post('/auth/login',authController.login)
+
+// create workspace 
+router.post('/workspace_create',workSpace.createWorkSpace)
 
 export default router
