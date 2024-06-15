@@ -15,4 +15,4 @@ const userSignup = new Schema<User>({
     verified:{type:Boolean,default:false}
 },{timestamps:true})
 
-export const userModel = model<User>('signup',userSignup)
+export const userModel = model<User>('signups',userSignup)
