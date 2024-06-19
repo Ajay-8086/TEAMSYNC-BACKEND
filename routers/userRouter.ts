@@ -15,11 +15,13 @@ router.post('/auth/verify_otp',authController.verifyOtp)
 // user login
 router.post('/auth/login',authController.login)
 
-
+// getting workspaces
+router.get('/workspace',veryifyToken,workSpace.gettingWorkspace)
 // create workspace 
 router.post('/workspace_create',veryifyToken,workSpace.createWorkSpace)
 //searching members
 router.post('/member_search',veryifyToken,workSpace.searchingMembers)
 
-
+//workspacedetails
+router.get('/user/workspaces/:workspaceId',veryifyToken,workSpace.workspaceDetails)
 export default router
