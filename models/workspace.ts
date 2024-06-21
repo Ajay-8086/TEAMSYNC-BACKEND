@@ -11,8 +11,8 @@ const workspaceCreation = new Schema<Workspace>({
     workspaceName:{type:String,required:true},
     workspaceType:{type:String,required:true},
     description:{type:String},
-    members:{type:[Schema.Types.ObjectId]},
+    members:{type:[Schema.Types.ObjectId],ref:'signups'},
     createdBy:{type:Schema.Types.ObjectId}
 },{timestamps:true})
 
-export const workspaceModel = model<Workspace>('workspace',workspaceCreation)
+export const workspaceModel = model<Workspace>('workspaces',workspaceCreation)

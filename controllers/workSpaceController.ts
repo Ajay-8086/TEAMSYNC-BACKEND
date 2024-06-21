@@ -65,12 +65,31 @@ export default {
         res.status(500).json("Internal server error")
       }
     },
+    //inviting members to the workspace
+    invitingMembers:async(req:Request,res:Response)=>{
+    try {
+      const {membersList,workspaceId} = req.body
+      // checking workspace exist or not
+      const workspace = await workspaceModel.findById(workspaceId)
+      if(!workspace){
+       return res.status(404).json('workspace does not exist')
+      }
+      // add members to the workspace
+      membersList.forEach((member:any) => {
+        workspace?.members?.push(member._id)
+      });
+      await workspace.save()
+     res.status(200).json('Workspace members added')
+    } catch (error) {
+        console.log(error);
+    }
 
-      // getting single workspace detils
+    },
+    // getting single workspace detils
     workspaceDetails:async(req:Request,res:Response)=>{
       try {
         const workspaceId = req.params.workspaceId
-        const workspaceDetails =await workspaceModel.findById(workspaceId).select('createdBy description members workspaceName workspaceType _id')
+        const workspaceDetails =await workspaceModel.findById(workspaceId).select('createdBy description members workspaceName workspaceType _id').populate('members')
         if(!workspaceDetails){
          return res.sendStatus(404)
         }

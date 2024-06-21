@@ -5,6 +5,7 @@ import { veryifyToken } from "../middlewares/auth";
 import authController from "../controllers/authController";
 //importing workspace controller
 import workSpace from "../controllers/workSpaceController";
+import board from "../controllers/boardController";
 
 const router = Router()
 
@@ -21,7 +22,11 @@ router.get('/workspace',veryifyToken,workSpace.gettingWorkspace)
 router.post('/workspace_create',veryifyToken,workSpace.createWorkSpace)
 //searching members
 router.post('/member_search',veryifyToken,workSpace.searchingMembers)
-
+//Inviting members
+router.post('/invite',veryifyToken,workSpace.invitingMembers)
 //workspacedetails
 router.get('/user/workspaces/:workspaceId',veryifyToken,workSpace.workspaceDetails)
+
+//board creation
+router.post('/boards_create',veryifyToken,board.creatingBoard)
 export default router
