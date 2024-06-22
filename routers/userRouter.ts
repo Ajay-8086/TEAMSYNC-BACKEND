@@ -29,4 +29,6 @@ router.get('/user/workspaces/:workspaceId',veryifyToken,workSpace.workspaceDetai
 
 //board creation
 router.post('/boards_create',veryifyToken,board.creatingBoard)
+//adding star to board
+router.patch('/boards/ad_to_star',veryifyToken,board.toggleStar)
 export default router

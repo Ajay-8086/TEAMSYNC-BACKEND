@@ -12,7 +12,7 @@ const workspaceCreation = new Schema<Workspace>({
     workspaceType:{type:String,required:true},
     description:{type:String},
     members:{type:[Schema.Types.ObjectId],ref:'signups'},
-    createdBy:{type:Schema.Types.ObjectId}
+    createdBy:{type:Schema.Types.ObjectId,ref:'signups'}
 },{timestamps:true})
 
 export const workspaceModel = model<Workspace>('workspaces',workspaceCreation)
