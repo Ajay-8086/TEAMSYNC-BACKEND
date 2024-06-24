@@ -26,6 +26,8 @@ router.post('/member_search',veryifyToken,workSpace.searchingMembers)
 router.post('/invite',veryifyToken,workSpace.invitingMembers)
 //workspacedetails
 router.get('/user/workspaces/:workspaceId',veryifyToken,workSpace.workspaceDetails)
+//deleting workspace
+router.delete('/user/workspace_delete/:workspaceId',veryifyToken,workSpace.deleteWorkspace)
 
 //board creation
 router.post('/boards_create',veryifyToken,board.creatingBoard)

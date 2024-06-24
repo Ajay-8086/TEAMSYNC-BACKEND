@@ -37,7 +37,7 @@ export default {
           })
          const newWorkspace =  await workspace.save()
          const workspaceId = newWorkspace._id.toString()         
-          return res.status(200).json({message:'Workspace created successfully',workspaceId})
+          return res.status(200).json({message:'Workspace created successfully',newWorkspace})
         }
        } catch (error) {
         console.log(error);
@@ -108,6 +108,28 @@ export default {
         res.status(500).send('Internal server error')
       }
       
+    },
+    // deleting workspace
+    deleteWorkspace:async (req:Request,res:Response)=>{
+      try {
+        const workspaceId = req.params.workspaceId
+        if(!workspaceId){
+         return res.sendStatus(404)
+        } 
+        const boards = await boardModel.find({workspace:workspaceId})
+        // deleting the boards under the workspaces
+        if(boards.length>0){
+          await boardModel.deleteMany({workspace:workspaceId})
+        }
+        // deleting the workspace 
+        await workspaceModel.deleteOne({_id:workspaceId})
+        return res.status(200).json("workspace deleted successfully")
+
+      } catch (error) {
+        console.log(error);
+        res.status(500).send('Internal server error')
+        
+      }
     }
 
 }
