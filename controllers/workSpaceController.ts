@@ -36,8 +36,9 @@ export default {
             createdBy:userId
           })
          const newWorkspace =  await workspace.save()
-         const workspaceId = newWorkspace._id.toString()         
-          return res.status(200).json({message:'Workspace created successfully',newWorkspace})
+        //  const workspaceId = newWorkspace._id.toString()         
+        const allWorkspaces = await workspaceModel.find()
+          return res.status(200).json({message:'Workspace created successfully',newWorkspace,allWorkspaces})
         }
        } catch (error) {
         console.log(error);
@@ -122,8 +123,9 @@ export default {
           await boardModel.deleteMany({workspace:workspaceId})
         }
         // deleting the workspace 
-        await workspaceModel.deleteOne({_id:workspaceId})
-        return res.status(200).json("workspace deleted successfully")
+       await workspaceModel.findByIdAndDelete({_id:workspaceId})
+       const newWorkspaces =  await workspaceModel.find()
+        return res.status(200).json({msg:"workspace deleted successfully",newWorkspaces})
 
       } catch (error) {
         console.log(error);

@@ -4,6 +4,7 @@ import validation from "../utilities/validation";
 import bcrypt from "bcrypt"
 import sendMail from "../utilities/sendOtpMail";
 import jwt from 'jsonwebtoken';
+import { profileModel } from "../models/profile";
 //otp storing space
 const otpStore = new Map()
 export default{
@@ -133,5 +134,30 @@ export default{
             console.log('error',error);
             res.status(500).json({mesage:"Internal server error"})
          }
+      },
+
+      // profile creation
+      profile:async(req:Request,res:Response)=>{
+         try {
+            const { jobtitle,department,organization,location,userId} =req.body
+            const updatedFields: { jobtitle?: string, department?: string, organization?: string, location?: string } = {};
+            // checking userId
+            if(!userId){
+               return res.sendStatus(400)
+            }
+            // adding the fields to the object
+            if (jobtitle) updatedFields.jobtitle = jobtitle;
+            if (department) updatedFields.department = department;
+            if (organization) updatedFields.organization = organization;
+            if (location) updatedFields.location = location;
+            
+            const newUser = await profileModel.findByIdAndUpdate(userId, { $set: updatedFields }, { new: true, upsert: true });
+            res.status(200).json({msg:'new user created',newUser})      
+
+         } catch (error) {
+            console.log(error);
+            res.status(500).send('Internal server error')
+         }
       }
+
 }

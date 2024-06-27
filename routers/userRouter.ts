@@ -15,6 +15,8 @@ router.post('/auth/register',authController.createUser)
 router.post('/auth/verify_otp',authController.verifyOtp)
 // user login
 router.post('/auth/login',authController.login)
+// user profile
+router.post('/profile',veryifyToken,authController.profile)
 
 // getting workspaces
 router.get('/workspace',veryifyToken,workSpace.gettingWorkspace)
