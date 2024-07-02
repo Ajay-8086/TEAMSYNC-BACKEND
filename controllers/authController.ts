@@ -150,10 +150,26 @@ export default{
             if (department) updatedFields.department = department;
             if (organization) updatedFields.organization = organization;
             if (location) updatedFields.location = location;
-            
-            const newUser = await profileModel.findByIdAndUpdate(userId, { $set: updatedFields }, { new: true, upsert: true });
+            const newUser = await profileModel.findOneAndUpdate({userId:userId}, { $set: updatedFields }, { new: true, upsert: true });
             res.status(200).json({msg:'new user created',newUser})      
 
+         } catch (error) {
+            console.log(error);
+            res.status(500).send('Internal server error')
+         }
+      },
+      // getting profile datas 
+      getProfile:async(req:Request,res:Response)=>{
+         try {
+             const userId = req.params.userId
+             if(!userId){
+               return res.sendStatus(400)
+             }
+             const userDatas =  await profileModel.findOne({userId:userId}).select( 'jobtitle department organization location userId').populate('userId')
+             if(!userDatas){
+               res.sendStatus(400)
+             }
+             return res.status(200).send(userDatas)  
          } catch (error) {
             console.log(error);
             res.status(500).send('Internal server error')

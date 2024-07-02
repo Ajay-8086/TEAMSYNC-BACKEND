@@ -10,7 +10,7 @@ export default {
       try {
           const {userId} =  req.user
           // getting all the workspaces 
-          const workspaces  = await workspaceModel.find({createdBy:userId}).select('createdBy description members workspaceName workspaceType _id') 
+          const workspaces  = await workspaceModel.find({createdBy:userId}).select('createdBy description members name workspaceType _id') 
           if(!workspaces){
            return res.status(404).json('Workspace is not available')
           }
@@ -29,7 +29,7 @@ export default {
             return res.status(400).json('All field are required')
         }else{
           const workspace =   new workspaceModel({
-            workspaceName:name,
+            name,
             workspaceType:type,
             description,
             members:[userId],
@@ -37,7 +37,7 @@ export default {
           })
          const newWorkspace =  await workspace.save()
         //  const workspaceId = newWorkspace._id.toString()         
-        const allWorkspaces = await workspaceModel.find()
+        const allWorkspaces = await workspaceModel.find({createdBy:userId})
           return res.status(200).json({message:'Workspace created successfully',newWorkspace,allWorkspaces})
         }
        } catch (error) {
@@ -91,7 +91,7 @@ export default {
     workspaceDetails:async(req:Request,res:Response)=>{
       try {
         const workspaceId = req.params.workspaceId
-        const workspaceDetails =await workspaceModel.findById(workspaceId).select('createdBy description members workspaceName workspaceType _id').populate('members')
+        const workspaceDetails =await workspaceModel.findById(workspaceId).select('createdBy description members name workspaceType _id').populate('members')
         if(!workspaceDetails){
          return res.sendStatus(404)
         }

@@ -1,6 +1,6 @@
 import {Schema , model} from "mongoose"
 export interface Board{
-    boardName:string,
+    name:string,
     workspace:Schema.Types.ObjectId,
     visibility:string,
     background:string
@@ -9,7 +9,7 @@ export interface Board{
 }
 
 const boardCreation = new Schema <Board>({
-    boardName:{type:String,required:true},
+    name:{type:String,required:true},
     workspace:{type:Schema.Types.ObjectId,ref:'workspaces'},
     visibility:{type:String},
     background:{type:String},

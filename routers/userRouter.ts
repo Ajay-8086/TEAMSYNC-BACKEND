@@ -16,7 +16,9 @@ router.post('/auth/verify_otp',authController.verifyOtp)
 // user login
 router.post('/auth/login',authController.login)
 // user profile
-router.post('/profile',veryifyToken,authController.profile)
+router.post('/profile_create',veryifyToken,authController.profile)
+// user profile get
+router.get('/profile/:userId',veryifyToken,authController.getProfile)
 
 // getting workspaces
 router.get('/workspace',veryifyToken,workSpace.gettingWorkspace)
@@ -35,4 +37,6 @@ router.delete('/user/workspace_delete/:workspaceId',veryifyToken,workSpace.delet
 router.post('/boards_create',veryifyToken,board.creatingBoard)
 //adding star to board
 router.patch('/boards/ad_to_star',veryifyToken,board.toggleStar)
+// getting board details 
+router.get('/user/boards/:boardId',veryifyToken,board.getBoardDetails)
 export default router

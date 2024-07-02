@@ -5,7 +5,7 @@ export interface Profile{
     department:string,
     organization:string,
     location:string,
-    userId:string
+    userId:Schema.Types.ObjectId
 }
 
 const userProfile = new Schema<Profile>({
@@ -13,7 +13,7 @@ const userProfile = new Schema<Profile>({
     department:{type:String},
     organization:{type:String},
     location:{type:String},  
-    userId:{type:String,required:true}
+    userId:{type:Schema.Types.ObjectId,ref:'signups'}
 },{timestamps:true})
 
 export const profileModel = model<Profile>('profile',userProfile)
