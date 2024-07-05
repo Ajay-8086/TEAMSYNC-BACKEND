@@ -6,6 +6,7 @@ import authController from "../controllers/authController";
 //importing workspace controller
 import workSpace from "../controllers/workSpaceController";
 import board from "../controllers/boardController";
+import task from "../controllers/taskController";
 
 const router = Router()
 
@@ -39,4 +40,11 @@ router.post('/boards_create',veryifyToken,board.creatingBoard)
 router.patch('/boards/ad_to_star',veryifyToken,board.toggleStar)
 // getting board details 
 router.get('/user/boards/:boardId',veryifyToken,board.getBoardDetails)
+// creating the columns in the task
+router.post('/user/boards/create_column',veryifyToken,board.createColumn)
+
+
+// creating the task
+router.post('/user/task/create',veryifyToken,task.creatingTask)
+
 export default router

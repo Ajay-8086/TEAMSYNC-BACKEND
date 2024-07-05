@@ -1,6 +1,7 @@
 import { Request,Response } from "express";
 import { boardModel } from "../models/boards";
 import { workspaceModel } from "../models/workspace";
+import { columnModel } from "../models/columns";
 export default{
     // creating the boards
     creatingBoard:async(req:Request,res:Response)=>{
@@ -56,10 +57,33 @@ export default{
             const boardsInWorkspace = await boardModel.find({ workspace: boardDetails.workspace });
             // getting workspace details 
             const workspace = await workspaceModel.findById(boardDetails.workspace);  
-            return res.status(200).json({ boardsInWorkspace, workspace ,boardDetails});
+            // getting column names
+            const columns = await columnModel.find({boardId:boardId}).populate('cards')            
+            return res.status(200).json({ boardsInWorkspace, workspace ,boardDetails,columns});
         } catch (error) {
             console.error(error);
             return res.status(500).send('Internal server error');
+        }
+    },
+    // creating the task columns
+    createColumn:async(req:Request,res:Response)=>{
+        try {
+            const {boardId,name} = req.body
+            if(!boardId || !name){
+               return res.sendStatus(401)
+            }
+            const columns = new columnModel({
+                boardId,
+                columnName:name,
+                cards:[]
+            })
+           const savedColumn =  await columns.save()
+            return res.status(200).send(savedColumn)
+            
+        } catch (error) {
+            console.log(error);
+            res.status(500).send('Internal server error')
+            
         }
     }
 }
