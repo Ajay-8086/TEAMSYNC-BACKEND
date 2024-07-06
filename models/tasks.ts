@@ -2,7 +2,6 @@ import { Schema, model } from "mongoose";
 
 export interface Tasks {
     taskName: string;
-    position:number
     columnId:Schema.Types.ObjectId
     description?: string;
     dueDate?: Date;
@@ -15,8 +14,7 @@ export interface Tasks {
 const taskCreation = new Schema<Tasks>({
     taskName: { type: String, required: true },
     description: { type: String, default: '' },
-    columnId: { type: String, required: true },
-    position: { type: Number, required: true },
+    columnId: { type: Schema.Types.ObjectId, required: true },
     dueDate: { type: Date },
     assignedTo: { type: [Schema.Types.ObjectId], default: [] },
     status: { type: String, default: '' },

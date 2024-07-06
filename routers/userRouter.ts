@@ -46,5 +46,7 @@ router.post('/user/boards/create_column',veryifyToken,board.createColumn)
 
 // creating the task
 router.post('/user/task/create',veryifyToken,task.creatingTask)
+// updating task and its postion
+router.put('/task/position',veryifyToken,task.updatingTaskAndColumn)
 
 export default router
