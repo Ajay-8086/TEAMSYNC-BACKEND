@@ -1,7 +1,6 @@
 import { Request,Response } from "express";
 import { taskModel } from "../models/tasks";
 import { columnModel } from "../models/columns";
-import mongoose from "mongoose";
 export default{
     // creating task function 
     creatingTask:async(req:Request,res:Response)=>{
@@ -14,7 +13,7 @@ export default{
             }         
             const tasks = new taskModel({
                 columnId,
-                taskName,
+                taskName
             })
             const newTask =  await tasks.save()
             column.cards?.push(newTask._id)

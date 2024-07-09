@@ -33,6 +33,8 @@ router.post('/invite',veryifyToken,workSpace.invitingMembers)
 router.get('/user/workspaces/:workspaceId',veryifyToken,workSpace.workspaceDetails)
 //deleting workspace
 router.delete('/user/workspace_delete/:workspaceId',veryifyToken,workSpace.deleteWorkspace)
+// getting all the workspace invitations
+router.get('/invitations',veryifyToken,workSpace.getPendingInvitations)
 
 //board creation
 router.post('/boards_create',veryifyToken,board.creatingBoard)
