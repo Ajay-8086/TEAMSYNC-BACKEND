@@ -6,7 +6,8 @@ export interface Invitation{
     boardId?:Schema.Types.ObjectId,
     invitee:Schema.Types.ObjectId,
     status:string,
-    message:string
+    message:string,
+    viewed:boolean
 }
 
 const invitation = new Schema<Invitation>({
@@ -15,6 +16,7 @@ const invitation = new Schema<Invitation>({
     boardId:{type:Schema.Types.ObjectId,ref:'boards'},
     invitee:{type:Schema.Types.ObjectId,ref:'signups'},
     status:{type:String,enum:['pending','accepted','rejected'],default:'pending'},
-    message:{type:String}
+    message:{type:String},
+    viewed:{type:Boolean,default:false}
 },{timestamps:true})
 export const invitationModel = model<Invitation>('invitations',invitation)

@@ -6,6 +6,7 @@ import { userModel } from "../models/user";
 import { boardModel } from "../models/boards";
 import { io, userSocketMap } from "../utilities/socket";
 import { invitationModel } from "../models/invitation";
+import { ObjectId } from "mongoose";
 
 export default {
     //Getting all the workspace details
@@ -13,7 +14,7 @@ export default {
       try {
           const {userId} =  req.user
           // getting all the workspaces 
-          const workspaces  = await workspaceModel.find({createdBy:userId}).select('createdBy description members name workspaceType _id') 
+          const workspaces  = await workspaceModel.find({members:userId}).select('createdBy description members name workspaceType _id') 
           if(!workspaces){
            return res.status(404).json('Workspace is not available')
           }
@@ -168,7 +169,7 @@ export default {
       try {
         const userId = req.user.userId
         // getting the invitations with board / workspace name
-        const invitations = await invitationModel.find({userId:userId,status:'pending'}).populate('workspaceId', 'name').populate('boardId','name').populate('invitee','name').select('_id workspaceId invitee boardId status message')        
+        const invitations = await invitationModel.find({userId:userId,status:'pending'}).populate('workspaceId', 'name').populate('boardId','name').populate('invitee','userName')
         if(!invitations){
           return res.sendStatus(404)
         }    
@@ -176,6 +177,50 @@ export default {
       } catch (error) {
         console.log(error);
         return res.status(500).send('Internal server error')
+      }
+    },
+    // handling the invitations 
+    invitationHandle:async(req:Request,res:Response)=>{
+      try {
+        const { actions } = req.params;
+        const { invitationId } = req.body;
+    
+        // Validate action
+        if (!['accepted', 'rejected'].includes(actions)) {
+          return res.status(400).json({ error: 'Invalid action' });
+        }
+    
+        // Fetch invitation
+        const invitation = await invitationModel.findById(invitationId);
+        if (!invitation) {
+          return res.status(404).json({ error: 'Invitation not found' });
+        }
+    
+        if (actions === 'accepted') {
+          if (invitation.workspaceId) {
+            // Update workspace members
+            const updateWorkspace = await workspaceModel.findById(invitation.workspaceId);
+            if (updateWorkspace) {
+              updateWorkspace?.members?.push(invitation.userId as ObjectId);
+              await updateWorkspace.save();
+            }
+          } else {
+            // Update board members
+            const updateBoard = await boardModel.findById(invitation.boardId);
+            if (updateBoard) {
+              updateBoard?.members?.push(invitation.userId as ObjectId);
+              await updateBoard.save();
+            }
+          }
+        }
+    
+        // Update invitation status
+        await invitationModel.findByIdAndUpdate(invitationId, { $set: { status: actions } }, { new: true });
+    
+        return res.status(200).send('Updated');
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal server error');
       }
     }
 
