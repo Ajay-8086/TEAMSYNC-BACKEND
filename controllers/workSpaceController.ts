@@ -7,6 +7,8 @@ import { boardModel } from "../models/boards";
 import { io, userSocketMap } from "../utilities/socket";
 import { invitationModel } from "../models/invitation";
 import { ObjectId } from "mongoose";
+import { columnModel } from "../models/columns";
+import { taskModel } from "../models/tasks";
 
 export default {
     //Getting all the workspace details
@@ -80,44 +82,84 @@ export default {
       }
     },
     //inviting members to the workspace
-    invitingMembers:async(req:CustomReaquest,res:Response)=>{
-      try {
-        const { membersList, workspaceId,boardId } = req.body;
-        const userId = req.user.userId
-        if (!workspaceId && !boardId) {
-          return res.status(404).json('workspace does not exist or boardId not exist');
+invitingMembers: async (req: CustomReaquest, res: Response) => {
+  try {
+    const { membersList, workspaceId, boardId } = req.body;
+    const userId = req.user.userId;
+
+    if (!workspaceId && !boardId) {
+      return res.status(404).json('Workspace or board does not exist');
+    }
+
+    const workspace = workspaceId ? await workspaceModel.findById(workspaceId) : null;
+    const board = boardId ? await boardModel.findById(boardId) : null;
+    const invitations = [];
+
+    for (const member of membersList) {
+      // Check if the user is already a member of the workspace
+      if (workspace) {
+        const isMember = workspace?.members?.some((memberId: ObjectId) => memberId == member._id);
+        if (isMember) {
+          console.log(`User with ID ${member._id} is already a member of the workspace`);
+          continue;
         }
-        const workspace = await workspaceModel.findById(workspaceId);
-        const boards  =  await boardModel.findById(boardId)
-        const invitations = [];
-        // Emit Socket.IO events to notify the invited members
-        for (const member of membersList) {
-          const invitation = new invitationModel({
-            userId: member._id,
-            invitee:userId,
-            workspaceId: workspaceId||null,
-            boardId:boardId||null,
-            message: `You have been invited to join the ${workspaceId ? workspace?.name : boards?.name}`
-          });
-          await invitation.save()
-          invitations.push(invitation);
-        };
-        // inviting each members in the member list
-        invitations.forEach((invitation) => {
-          const socketId = userSocketMap[invitation.userId.toString()];
-          if (socketId) {
-            io.to(socketId).emit('receiveInvitation', invitation);
-          } else {
-            console.log(`User with ID ${invitation.userId} is not connected`);
-          }
-        });
-    
-        res.status(200).json('Workspace members added');
-      } catch (error) {
-        console.log(error);
-        res.status(500).json('An error occurred');
       }
-    },
+
+      // Check if the user is already a member of the board
+      if (board) {
+        const isMember = board?.members?.some((memberId: ObjectId) => memberId == member._id);
+        if (isMember) {
+          console.log(`User with ID ${member._id} is already a member of the board`);
+          continue;
+        }
+      }
+
+      // Check if the invitation already exists
+      const existingInvitation = await invitationModel.findOne({
+        userId: member._id,
+        workspaceId: workspaceId || null,
+        boardId: boardId || null
+      });
+
+      if (existingInvitation) {
+        console.log(`User with ID ${member._id} already invited`);
+        continue; // Skip this member as they are already invited
+      }
+
+      const invitation = new invitationModel({
+        userId: member._id,
+        invitee: userId,
+        workspaceId: workspaceId || null,
+        boardId: boardId || null,
+        message: `You have been invited to join the ${workspaceId ? workspace?.name : board?.name}`
+      });
+
+      await invitation.save();
+      invitations.push(invitation);
+    }
+   
+    if(invitations.length==0){
+      return res.status(400).json('these users already exist or empty search')
+    }else{
+      invitations.forEach((invitation) => {
+        const socketId = userSocketMap[invitation.userId.toString()];
+        if (socketId) {
+          io.to(socketId).emit('receiveInvitation', invitation);
+        } else {
+          console.log(`User with ID ${invitation.userId} is not connected`);
+        }
+      });
+  
+      res.status(200).json('Workspace members added');
+    }
+    
+    // Emit Socket.IO events to notify the invited members
+  } catch (error) {
+    console.log(error);
+    res.status(500).json('An error occurred');
+  }
+},
+
     // getting single workspace detils
     workspaceDetails:async(req:Request,res:Response)=>{
       try {
@@ -151,6 +193,13 @@ export default {
         const boards = await boardModel.find({workspace:workspaceId})
         // deleting the boards under the workspaces
         if(boards.length>0){
+          for(const board of boards){
+            const columns = await columnModel.find({boardId:board._id})
+            for(const column of columns){
+              await taskModel.deleteMany({columnId:column._id})
+            }
+            await columnModel.deleteMany({boardId:board._id})
+          }
           await boardModel.deleteMany({workspace:workspaceId})
         }
         // deleting the workspace 
@@ -217,7 +266,7 @@ export default {
         // Update invitation status
         await invitationModel.findByIdAndUpdate(invitationId, { $set: { status: actions } }, { new: true });
     
-        return res.status(200).send('Updated');
+        return res.status(200).json({ message: 'Invitation handled successfully.' });
       } catch (error) {
         console.error(error);
         res.status(500).send('Internal server error');
